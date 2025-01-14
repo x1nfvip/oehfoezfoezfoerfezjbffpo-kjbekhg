@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CloudWare SelfBot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- KeyAuth Section -->
+    <div class="login-container" id="keyAuthSection">
+        <div class="login-header">
+            <h1>CloudWare Access</h1>
+            <p>Enter your license key to continue</p>
+        </div>
+        <div class="login-form">
+            <input type="text" id="licenseKey" placeholder="Enter your license key">
+            <button onclick="verifyLicense()" id="keyAuthButton">Activate License</button>
+        </div>
+    </div>
+
+    <!-- Discord Token Section -->
+    <div class="login-container" id="discordSection" style="display: none;">
+        <div class="login-header">
+            <h1>Discord Login</h1>
+            <p>Enter your Discord token to access the panel</p>
+        </div>
+        <div class="login-form">
+            <input type="password" id="discordToken" placeholder="Enter your Discord token">
+            <button onclick="verifyDiscordToken()" id="discordButton">Connect to Discord</button>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container" id="mainContainer" style="display: none;">
+        <div class="command-grid">
+            <!-- Commands will be loaded here -->
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <!-- Scripts -->
+    <script src="keyauth.js"></script>
+    <script src="discord.js"></script>
+    <script src="commands.js"></script>
+
+    <script>
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            setTimeout(() => notification.classList.remove('show'), 3000);
+        }
+
+        function showOptions(id) {
+            const options = document.getElementById(id);
+            options.classList.toggle('active');
+        }
+    </script>
+</body>
+</html>
