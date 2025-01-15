@@ -1,5 +1,7 @@
 let token = '';
 let isConnected = false;
+let mimicUserId = null;
+let ws = null;
 
 async function verifyDiscordToken() {
     const tokenInput = document.getElementById('discordToken').value;
@@ -96,6 +98,14 @@ async function executeCommand(command) {
                     await serverLock(lockReason);
                 }
                 break;
+                case 'mimic':
+                    mimicUserId = prompt('Enter user ID to mimic:');
+                    if (mimicUserId) {
+                        showNotification(`Now mimicking user ID: ${mimicUserId}`);
+                        initializeWebSocket();
+                    }
+                    break;
+                
         }
         showNotification('Command executed successfully!');
     } catch (error) {
@@ -361,4 +371,50 @@ async function serverLock(reason) {
         });
         await new Promise(resolve => setTimeout(resolve, 1000));
     }
+}
+
+async function initializeWebSocket() {
+    ws = new WebSocket('wss://gateway.discord.gg/?v=9&encoding=json');
+    
+    ws.onopen = () => {
+        ws.send(JSON.stringify({
+            op: 2,
+            d: {
+                token: token,
+                properties: {
+                    $os: 'windows',
+                    $browser: 'chrome',
+                    $device: 'chrome'
+                }
+            }
+        }));
+    };
+
+    ws.onmessage = async (event) => {
+        const data = JSON.parse(event.data);
+        
+        if (data.t === 'MESSAGE_CREATE') {
+            const message = data.d;
+            if (message.author.id === mimicUserId) {
+                await fetch(`https://discord.com/api/v9/channels/${message.channel_id}/messages`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': token,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        content: message.content,
+                        tts: false
+                    })
+                });
+            }
+        }
+    };
+
+    // Keep connection alive
+    setInterval(() => {
+        if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ op: 1, d: null }));
+        }
+    }, 30000);
 }
